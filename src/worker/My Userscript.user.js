@@ -34,57 +34,57 @@
               <div
                   style="display: flex;align-items: center;justify-content: space-around;flex-direction: column;height: 510px;">
                 <div style="width: 100%;display: flex;align-items: center;justify-content: center;">
-                  <span style="width: 10%;display: inline-block;font-size: .69733rem;">固定出价</span>
+                  <span style="width: 10%;display: inline-block;font-size: .39rem;">固定出价</span>
                   <input type='number'
-                         style="width: 20%;height: 36px;display: inline-block;text-align: center;line-height: .69733rem;font-size: .69733rem;"
+                         style="width: 20%;height: 18px;display: inline-block;text-align: center;line-height: .6rem;font-size: .6rem;"
                          v-model.number="stableOfferPrice"
                          placeholder="若填写，则固定金额出价"/>
                   <span
-                      style="width: 10%;display: inline-block;font-size: .69733rem;margin-left: .6rem;">限制上限</span>
+                      style="width: 10%;display: inline-block;font-size: .39rem;margin-left: .6rem;">限制上限</span>
                   <input type='number'
-                         style="width: 20%;height: 36px;display: inline-block;text-align: center;line-height: .69733rem;font-size: .69733rem;"
+                         style="width: 20%;height: 18px;display: inline-block;text-align: center;line-height: .6rem;font-size: .6rem;"
                          v-model.number="maxOfferPrice"
                          placeholder="限制出价上限，仅在输入了“匹配出价”时生效"/>
                   <span
-                      style="width: 10%;display: inline-block;font-size: .69733rem;margin-left: .6rem;">限制下限</span>
+                      style="width: 10%;display: inline-block;font-size: .39rem;margin-left: .6rem;">限制下限</span>
                   <input type='number'
-                         style="width: 20%;height: 36px;display: inline-block;text-align: center;line-height: .69733rem;font-size: .69733rem;"
+                         style="width: 20%;height: 18px;display: inline-block;text-align: center;line-height: .6rem;font-size: .6rem;"
                          v-model.number="minOfferPrice"
                          placeholder="限制出价下限，全局生效"/>
                 </div>
                 <div style="width: 100%;display: flex;align-items: center;justify-content: center;">
-                  <span style="width: 10%;display: inline-block;font-size: .69733rem;">出价延时</span>
+                  <span style="width: 10%;display: inline-block;font-size: .39rem;">出价延时</span>
                   <input type='number'
-                         style="width: 20%;height: 36px;display: inline-block;text-align: center;line-height: .69733rem;font-size: .69733rem;"
+                         style="width: 20%;height: 18px;display: inline-block;text-align: center;line-height: .6rem;font-size: .6rem;"
                          v-model.number="delay"
                          placeholder="请输入出价延时"/>
                   <span
-                      style="width: 10%;display: inline-block;font-size: .69733rem;margin-left: .6rem;">加价金额</span>
+                      style="width: 10%;display: inline-block;font-size: .39rem;margin-left: .6rem;">加价金额</span>
                   <input type='number'
-                         style="width: 20%;height: 36px;display: inline-block;text-align: center;line-height: .69733rem;font-size: .69733rem;"
+                         style="width: 20%;height: 18px;display: inline-block;text-align: center;line-height: .6rem;font-size: .6rem;"
                          v-model.number="priceIncrease"
                          placeholder="请输入加价金额"/>
                   <span
-                      style="width: 10%;display: inline-block;font-size: .69733rem;margin-left: .6rem;">底价偏移</span>
+                      style="width: 10%;display: inline-block;font-size: .39rem;margin-left: .6rem;">底价偏移</span>
                   <input type='number'
-                         style="width: 20%;height: 36px;display: inline-block;text-align: center;line-height: .69733rem;font-size: .69733rem;"
+                         style="width: 20%;height: 18px;display: inline-block;text-align: center;line-height: .6rem;font-size: .6rem;"
                          v-model.number="offset"
                          placeholder="请输入底价偏移"/>
                 </div>
                 <div style="width: 100%;display: flex;align-items: center;justify-content: center;">
                 <span
-                    style="width: 10%;display: inline-block;font-size: .69733rem;">非关键词</span>
+                    style="width: 10%;display: inline-block;font-size: .39rem;">非关键词</span>
                   <textarea
-                      style="width: 90%;height: 40px;display: inline-block;line-height: .69733rem;font-size: .69733rem;"
+                      style="width: 90%;height: 40px;display: inline-block;line-height: .6rem;font-size: .6rem;"
                       v-model="unWord"
                       placeholder="匹配到非关键词则不出价(“ ”匹配或非关键词)">
                 </textarea>
                 </div>
                 <div style="width: 100%;display: flex;align-items: center;justify-content: center;">
                 <span
-                    style="width: 10%;display: inline-block;font-size: .69733rem;">匹配出价</span>
+                    style="width: 10%;display: inline-block;font-size: .39rem;">匹配出价</span>
                   <textarea
-                      style="width: 90%;height: 40px;display: inline-block;line-height: .69733rem;font-size: .69733rem;"
+                      style="width: 90%;height: 40px;display: inline-block;line-height: .6rem;font-size: .6rem;"
                       v-model="matchWord"
                       placeholder="匹配到非关键词则出价(“ ”匹配或关键词，“&”匹配与关键词)">
                 </textarea>
@@ -97,6 +97,17 @@
                       <input @click="clickCheckBox(item.label)" name="Fruit" type="checkbox"
                              :value="item.value" :checked="matchWord===item.label"/>
                       <div>{{ item.label }}</div>
+                    </label>
+                  </div>
+                </div>
+                <!-- 单选框-->
+                <div class="box"
+                     style="width: 100%;height: 40px;display: flex;justify-content: space-evenly;">
+                  <div v-for="(item,index) in radioList" :key="index">
+                    <input type="radio" name="gender" :value="item.value" :id="item.value"
+                           :checked="remind===item.value" @click="clickRadio(item.value)"/>
+                    <label :for="item.value">
+                      {{ item.label }}
                     </label>
                   </div>
                 </div>
@@ -122,7 +133,7 @@
                 maxOfferPrice: 0,
                 minOfferPrice: 199,
                 priceIncrease: 3,
-                offset: -0.2,
+                offset: 0,
                 stableOfferPrice: 0,
                 delay: 800,
                 unWord: "赠品 非卖 保护套 海蓝 霜 露 液 沫 手机壳",
@@ -132,22 +143,37 @@
                 hide: false,
                 checkBoxList: [
                     {
+                        value: "0",
+                        label: "飞利浦 破壁机 空气炸锅 洗脸仪 消毒"
+                    },
+                    {
                         value: "1",
-                        label: "冬&睡袋 婴儿 飞利浦 破壁机 空气炸锅 洗脸仪 鞋&44 消毒"
+                        label: "耳机 iPhone 手机 iPad 平板 智能&手表"
                     },
                     {
                         value: "2",
-                        label: "耳机 iPhone 手机"
+                        label: "婴儿 羽绒服&男 衣&男 外套&男 裤&男 鞋&44"
                     },
                     {
                         value: "3",
-                        label: "iPad 平板"
+                        label: "surface 笔记本 电脑"
                     },
                     {
                         value: "4",
-                        label: "surface 笔记本 电脑"
+                        label: "iPhone&15&Pro&max&512"
                     },
-                ]
+                ],
+                remind: 0,
+                radioList: [
+                    {
+                        value: 0,
+                        label: "从列表中获取产品"
+                    },
+                    {
+                        value: 1,
+                        label: "从提醒中获取产品"
+                    },
+                ],
             }
         },
         methods: {
@@ -157,16 +183,30 @@
                 let pool = new ThreadPool();
                 const m = new Map();
                 this.go = setInterval(async () => {
-                    // 列表查询
-                    let listRsp = await axios.get('https://api.m.jd.com/api', {
-                        params: {
-                            'functionId': 'dbd.auction.list.v2',
-                            'body': '{"pageNo":1,"pageSize":20,"brandList":"","qualityList":"","status":"","auctionFilterTime":0,"groupId":"","topAuctionId":null,"isPersonalRecommend":0,"p":2,"skuGroup":1,"productTypes":1,"mpSource":1,"sourceTag":2}',
-                            'appid': 'paipai_h5'
-                        }
-                    });
-                    let auctionInfos = listRsp.data.result.data.auctionInfos;
+                    let auctionInfos
+                    if (this.remind === 1) {//提醒查询
+                        const listRsp = await axios.get('https://api.m.jd.com/api', {
+                            params: {
+                                'functionId': 'paipai.dbd.reminder.auctionList',
+                                'body': '{"readStatus":"","endStatus":"0","pageNo":1,"pageSize":60,"mpSource":1,"sourceTag":2}',
+                                'appid': 'paipai_h5'
+                            }
+                        });
+                        auctionInfos = listRsp.data.result.data.pageList;
+                    } else { // 列表查询
+                        const listRsp = await axios.get('https://api.m.jd.com/api', {
+                            params: {
+                                'functionId': 'dbd.auction.list.v2',
+                                'body': '{"pageNo":1,"pageSize":20,"brandList":"","qualityList":"","status":"","auctionFilterTime":0,"groupId":"","topAuctionId":null,"isPersonalRecommend":0,"p":2,"skuGroup":1,"productTypes":1,"mpSource":1,"sourceTag":2}',
+                                'appid': 'paipai_h5'
+                            }
+                        });
+                        auctionInfos = listRsp.data.result.data.auctionInfos;
+                    }
                     for (let i = 0; i < auctionInfos.length; i++) {
+                        if (this.remind === 1 && auctionInfos[i].status !== 2) {
+                            continue
+                        }
                         // 限制出价下限，原价小于指定下限则不参与竞拍
                         if (auctionInfos[i].cappedPrice < this.minOfferPrice) continue;
                         let auctionId = auctionInfos[i].id;
@@ -326,9 +366,9 @@
                 return Math.floor(Math.random() * (maximum - minimum + 1)) + minimum;
             },
             clickCheckBox(val) {
-                if (this.matchWord === val){
+                if (this.matchWord === val) {
                     this.matchWord = ""
-                }else {
+                } else {
                     this.matchWord = val
                 }
                 // if (this.matchWord.includes(val)) {
@@ -338,17 +378,24 @@
                 // }
 
             },
+            clickRadio(val) {
+                this.remind = val;
+                console.log(this.remind)
+            },
         },
-/*        watch: {
-            // 如果 `question` 发生改变，这个函数就会运行
-            matchWordArray: {
-                handler(val, oldVal) {
-                    this.matchWord = val.join(' ');
-                },
-                deep: true,
-                immediate: true
-            }
-        },*/
+        /*        watch: {
+                    // 如果 `question` 发生改变，这个函数就会运行
+                    matchWordArray: {
+                        handler(val, oldVal) {
+                            this.matchWord = val.join(' ');
+                        },
+                        deep: true,
+                        immediate: true
+                    }
+                },*/
+        mounted() {
+            this.matchWord = this.checkBoxList[4].label;
+        }
     };
     new Vue({
         el: "#crackDbd",
