@@ -131,9 +131,9 @@
         data() {
             return {
                 maxOfferPrice: 0,
-                minOfferPrice: 199,
+                minOfferPrice: 299,
                 priceIncrease: "1-3",
-                offset: 0,
+                offset: -0.1,
                 stableOfferPrice: 0,
                 delay: 800,
                 unWord: "赠品 非卖 保护套 海蓝 霜 露 液 沫 手机壳",
@@ -605,7 +605,6 @@
                         },
                     }
                 );
-                console.log(detailRsp)
                 let usedNo = detailRsp.data.result.data.auctionInfo.usedNo;
                 // 历史价查询
                 const historyRsp = await axios.post(
@@ -622,11 +621,14 @@
                 let offerPriceHistory = historyRsp.data.result.data
                 // 计算最小出价金额，没记录取原价的百分之十、有记录取最小记录
                 let min;
-                if (offerPriceHistory.length <= 5) {
-                    min = detailRsp.data.result.data.auctionInfo.cappedPrice * 0.1;
+                // 未找到历史出价时，最小出价金额默认值为原价的1折
+                let cappedPriceMin = detailRsp.data.result.data.auctionInfo.cappedPrice * 0.1;
+                if (offerPriceHistory.length === 0) {
+                    min = cappedPriceMin;
                 } else {
                     const arr = offerPriceHistory.map(({offerPrice}) => offerPrice);
-                    min = Math.min.apply(null, arr);
+                    let historyMin = Math.min.apply(null, arr);
+                    min = cappedPriceMin < historyMin ? cappedPriceMin : historyMin
                 }
                 return min;
             },
