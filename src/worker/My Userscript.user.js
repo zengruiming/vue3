@@ -53,17 +53,17 @@
                          placeholder="限制出价下限，全局生效"/>
                 </div>
                 <div style="width: 100%;display: flex;align-items: center;justify-content: center;">
-                  <span style="width: 10%;display: inline-block;font-size: .39rem;">出价延时</span>
+                  <span style="width: 10%;display: inline-block;font-size: .39rem;">底价出价</span>
                   <input type='number'
                          style="width: 20%;height: 18px;display: inline-block;text-align: center;line-height: .6rem;font-size: .6rem;"
-                         v-model.number="delay"
-                         placeholder="请输入出价延时"/>
+                         v-model.number="bottomOfferPrice"
+                         placeholder="若填写，则固定底价金额出价"/>
                   <span
                       style="width: 10%;display: inline-block;font-size: .39rem;margin-left: .6rem;">加价金额</span>
                   <input
                       style="width: 20%;height: 18px;display: inline-block;text-align: center;line-height: .6rem;font-size: .6rem;"
                       v-model="priceIncrease"
-                      placeholder="请输入加价金额"/>
+                      placeholder="0-*、*-0则当前价到底价随机，否则当前价+随机金额"/>
                   <span
                       style="width: 10%;display: inline-block;font-size: .39rem;margin-left: .6rem;">底价偏移</span>
                   <input type='number'
@@ -132,10 +132,10 @@
             return {
                 maxOfferPrice: 0,
                 minOfferPrice: 299,
-                priceIncrease: "1-3",
+                priceIncrease: "1-0",
                 offset: -0.1,
                 stableOfferPrice: 0,
-                delay: 800,
+                bottomOfferPrice: 0,
                 unWord: "赠品 非卖 保护套 海蓝 霜 露 液 沫 手机壳",
                 matchWord: "",
                 message: "",
@@ -269,6 +269,8 @@
                             }
                             //若为整数，则直接偏移整数价格；若为小数，则偏移小数乘以最小出价金额的价格
                             this.m.set(auctionId, parseInt(this.offset) === parseFloat(this.offset) ? min + this.offset : min + min * this.offset);
+                            //抬价金额
+                            let increaseOfferPrice = this.randomPrice(parseInt(this.priceIncrease.split('-')[0]), parseInt(this.priceIncrease.split('-')[1]));
                             //开始任务
                             pool
                                 .run((param, done) => {
@@ -294,7 +296,7 @@
                                             "mode": "cors"
                                         });
                                         let jsonData = await res.json();
-                                        let offerTime = jsonData.result.data.actualEndTime - Date.now() - param[3];
+                                        let offerTime = jsonData.result.data.actualEndTime - Date.now() - 800;
                                         setTimeout(async () => {
                                             let res = await fetch("https://api.m.jd.com/api?functionId=paipai.auction.get_current_and_offerNum&t=" + Date.now() + "&appid=paipai_h5", {
                                                 "credentials": "include",
@@ -317,21 +319,30 @@
                                                 "mode": "cors"
                                             });
                                             let jsonData = await res.json();
-                                            let currentPrice = jsonData.result.data.currentPrice;
-                                            // 判断是否固定价格出价
+                                            let currentPrice = jsonData.result.data.currentPrice + 1;
+
                                             let offerPrice
-                                            if (param[2] === 0) {
-                                                offerPrice = currentPrice + param[1]
-                                            } else {
+                                            if (param[2]) {
+                                                // 固定价格出价
                                                 offerPrice = param[2]
+                                            } else if (param[3]) {
+                                                // 固定底价出价
+                                                offerPrice = param[0]
+                                            } else {
+                                                // 随机抬价金额出价
+                                                let randomPrice = param[1];
+                                                if(randomPrice){
+                                                    offerPrice = currentPrice + randomPrice - 1
+                                                }else {
+                                                    offerPrice = Math.floor(Math.random() * (currentPrice - param[0] + 1)) + param[0]
+                                                }
                                             }
-                                            if (currentPrice === null) offerPrice = 0;
                                             if (currentPrice > param[0]) offerPrice = 0;
                                             let priceBody = 'address=19-1607-4773-62122&auctionId=' + param[4] + '&entryid=&price=' + offerPrice + '&trackId=&eid=ZH62NVZXFHVBIMN5EUDTDWDBDGWE7FE6MMX2RXO65RUWXACGTJIZ5BS5FCU42MCYCGACXEBSPKCXDRIETUNG4DVMPM&fp=62888e893a17d91eaa7ad146eab9aaa3&p=2&token=phzn1gvh8g5ebct6hwu1608302936875uky5~NmZeSyVEbFNSd3d1d1FZA3p8AQ5nRHpTBiUjb35DFm5vLUROOBEzLUF7G28iAAFBKBgVFA1EPwIVKDclGENXbm8iVlQiAwpTTx1lKSsTCG5vfmsaDUR6LUEnG29%2BPU8KLHMHDGUCYERaeX4vcwQPA3V0Ago1BGFBWnkhfiJUVV97JgNkc0oKUwoyKhFmWzEQOTZCXQ1Eei1BKTQ5GENXbm80VlEhBz9fDm8tKWoCAl8RZhtkcxY4LUF7G29rDEJALC1EXQ4HIxIXKCgjagkZXyEYFRQNRCYFP2N9EWYJGUY9Nw1kc0oKUxMoG29%2BPU8Hf2gGDn1eekVPcWt8c1QxEDBmGxo0AjICBGN9bzBXCFxvaBVbIkRsUw80dXpzDV5KNC5UTiADOR0ZJC01N1RfBX4iXQg5AyYXEHk2emZNT1FvfhVIZ18mHRl5PXQ2BwcCfXRFVCkfZ0dTdHd8cFlfAXpxBUw7DG9TT2MjPipDVxA0JQUNNV81C0FtZSQ3Q1cQfGYbGjsPNVNZY350fVlPTw%3D%3D%7C~1608304185632~1~20201218~eyJ2aXdlIjoiMCIsImJhaW4iOnt9fQ%3D%3D~2~515~1pl4%7Cgw4w%3B5d4ae-qz%2C1j3%2C%2C%3B5dmu-me%2C1ii%2C%2C%3Bdoei%3A%2C1%2C413%2C413%2C0%2C0%2C1%2C1%2C0%2C0%3Bdmei%3A%2C1%2C413%2C0%2C0%2C0%2C0%2C0%2C0%2C0%3Bemc%3A%2Cd%3A1%3Bemmm%3A%3Bemcf%3A%2Cd%3A1%3Bivli%3A%3Biivl%3A%3Bivcvj%3A%3Bscvje%3A%3Bewhi%3A%3B1608304178659%2C1608304185628%2C0%2C0%2C3%2C3%2C0%2C1%2C0%2C0%2C0%3Btt4b&initFailed=false';//提交价格请求体
                                             done([priceBody, offerPrice]);
                                         }, offerTime)
                                     })();
-                                }, [this.m.get(auctionId), this.randomPrice(parseInt(this.priceIncrease.split('-')[0]), parseInt(this.priceIncrease.split('-')[1])), this.stableOfferPrice, this.delay, auctionId])
+                                }, [this.m.get(auctionId), increaseOfferPrice, this.stableOfferPrice, this.bottomOfferPrice, auctionId])
                                 .done(result => {
                                     if (result[1] === 0) {
                                         this.message = "并未出价：超过了近期最低价！";
@@ -644,9 +655,9 @@
                 if (this.unWord !== '' && this.unWord.split(" ").some(s1 => pName.includes(s1))) return false;
                 return mWord.split(" ").some(str => str.split("&").every(s1 => pName.includes(s1)));
             },
-            randomPrice(minimum, maximum) {
-                // 校验是否包含关键词
-                return Math.floor(Math.random() * (maximum - minimum + 1)) + minimum;
+            randomPrice(min, max) {
+                // 最小、大值为0时，返回0；用于当前价格最小金额随机出价方式
+                return min && max ? Math.floor(Math.random() * (max - min + 1)) + min : 0
             },
             clickCheckBox(val) {
                 if (this.matchWord === val) {
