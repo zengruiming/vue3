@@ -163,7 +163,7 @@
                         label: "iPhone&15&Pro&max&512"
                     },
                 ],
-                offerModel: [0],
+                offerModel: [0, 1, 2],
                 radioList: [
                     {
                         value: 0,
@@ -700,9 +700,9 @@
                         immediate: true
                     }
                 },*/
-        mounted() {
+/*        mounted() {
             this.matchWord = this.checkBoxList[4].label;
-        }
+        }*/
     };
     new Vue({
         el: "#crackDbd",
