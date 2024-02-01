@@ -623,12 +623,17 @@
                 let min;
                 // 未找到历史出价时，最小出价金额默认值为原价的1折
                 let cappedPriceMin = detailRsp.data.result.data.auctionInfo.cappedPrice * 0.1;
-                if (offerPriceHistory.length === 0) {
+                let length = offerPriceHistory.length;
+                if (length === 0) {
                     min = cappedPriceMin;
                 } else {
                     const arr = offerPriceHistory.map(({offerPrice}) => offerPrice);
                     let historyMin = Math.min.apply(null, arr);
-                    min = cappedPriceMin < historyMin ? cappedPriceMin : historyMin
+                    if (length < 5) {
+                        min = cappedPriceMin < historyMin ? cappedPriceMin : historyMin
+                    } else {
+                        min = historyMin
+                    }
                 }
                 return min;
             },
