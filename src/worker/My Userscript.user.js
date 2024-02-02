@@ -338,8 +338,8 @@
                                                 }
                                             }
                                             if (currentPrice > param[0]) offerPrice = 0;
-                                            let priceBody = 'address=19-1607-4773-62122&auctionId=' + param[4] + '&entryid=&price=' + Math.ceil(offerPrice) + '&trackId=&eid=ZH62NVZXFHVBIMN5EUDTDWDBDGWE7FE6MMX2RXO65RUWXACGTJIZ5BS5FCU42MCYCGACXEBSPKCXDRIETUNG4DVMPM&fp=62888e893a17d91eaa7ad146eab9aaa3&p=2&token=phzn1gvh8g5ebct6hwu1608302936875uky5~NmZeSyVEbFNSd3d1d1FZA3p8AQ5nRHpTBiUjb35DFm5vLUROOBEzLUF7G28iAAFBKBgVFA1EPwIVKDclGENXbm8iVlQiAwpTTx1lKSsTCG5vfmsaDUR6LUEnG29%2BPU8KLHMHDGUCYERaeX4vcwQPA3V0Ago1BGFBWnkhfiJUVV97JgNkc0oKUwoyKhFmWzEQOTZCXQ1Eei1BKTQ5GENXbm80VlEhBz9fDm8tKWoCAl8RZhtkcxY4LUF7G29rDEJALC1EXQ4HIxIXKCgjagkZXyEYFRQNRCYFP2N9EWYJGUY9Nw1kc0oKUxMoG29%2BPU8Hf2gGDn1eekVPcWt8c1QxEDBmGxo0AjICBGN9bzBXCFxvaBVbIkRsUw80dXpzDV5KNC5UTiADOR0ZJC01N1RfBX4iXQg5AyYXEHk2emZNT1FvfhVIZ18mHRl5PXQ2BwcCfXRFVCkfZ0dTdHd8cFlfAXpxBUw7DG9TT2MjPipDVxA0JQUNNV81C0FtZSQ3Q1cQfGYbGjsPNVNZY350fVlPTw%3D%3D%7C~1608304185632~1~20201218~eyJ2aXdlIjoiMCIsImJhaW4iOnt9fQ%3D%3D~2~515~1pl4%7Cgw4w%3B5d4ae-qz%2C1j3%2C%2C%3B5dmu-me%2C1ii%2C%2C%3Bdoei%3A%2C1%2C413%2C413%2C0%2C0%2C1%2C1%2C0%2C0%3Bdmei%3A%2C1%2C413%2C0%2C0%2C0%2C0%2C0%2C0%2C0%3Bemc%3A%2Cd%3A1%3Bemmm%3A%3Bemcf%3A%2Cd%3A1%3Bivli%3A%3Biivl%3A%3Bivcvj%3A%3Bscvje%3A%3Bewhi%3A%3B1608304178659%2C1608304185628%2C0%2C0%2C3%2C3%2C0%2C1%2C0%2C0%2C0%3Btt4b&initFailed=false';//提交价格请求体
-                                            done([priceBody, offerPrice]);
+                                            //auctionId、offerPrice
+                                            done([param[4], Math.ceil(offerPrice)]);
                                         }, offerTime)
                                     })();
                                 }, [this.m.get(auctionId), increaseOfferPrice, this.stableOfferPrice, this.bottomOfferPrice, auctionId])
@@ -347,19 +347,27 @@
                                     if (result[1] === 0) {
                                         this.message = "并未出价：超过了近期最低价！";
                                     } else {
-                                        axios({
-                                            url: 'https://used-api.jd.com/auctionRecord/offerPrice',
-                                            method: 'post',
-                                            data: result[0],
-                                        }).then(res => {
-                                            this.message = "请求结果：" + res.data.message;
+                                        let t = (new Date).getTime()
+                                        axios.post(
+                                            'https://api.m.jd.com/api',
+                                            `body={"auctionId":"${result[0]}","price":${result[1]},"ts":${t},"entryid":"p0020003youb3","address":"19-1607-4773-62122","mpSource":1,"sourceTag":2}`,
+                                            {
+                                                params: {
+                                                    'functionId': 'paipai.auction.offerPrice',
+                                                    't': t,
+                                                    'appid': 'paipai_h5',
+                                                    'x-api-eid-token': jdtRiskContext.deviceInfo.jsToken,
+                                                    'uuid': this.getCookieUUID("__jda")
+                                                }
+                                            }
+                                        ).then(res => {
+                                            this.message = "请求结果：" + res.data.result.message
                                         })
                                     }
                                     this.m.delete(auctionId)
                                     this.auctionInfos.splice(i, 1)
                                 });
                         } catch (error) {
-                            console.error(`Error fetching:`, error.message);
                             continue; // 出现错误，但继续下一次循环
                         }
                     }
