@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         My Userscript
 // @namespace    http://tampermonkey.net/
-// @version      0.8
+// @version      0.6
 // @description  try to take over the world!
 // @author       You
 // @grant        none
@@ -126,9 +126,7 @@
               <div
                   style="display: flex;align-items: center;justify-content: space-around;flex-direction: column;height: 100%;" v-show="switchLog">
               <textarea
-                  style="width: 100%;height: 100%;display: inline-block;line-height: .5rem;font-size: .5rem;border: none;"
-                  :placeholder="offerLog" readonly="readonly">
-                </textarea>
+                  style="width: 100%;height: 100%;display: inline-block;line-height: .5rem;font-size: .5rem;border: none;" readonly="readonly">{{offerLog}}</textarea>
               </div>
               <div v-show="message" style="color: red;text-align: center;" @click="switchLog = !switchLog">{{ message }}</div>
             </div>
@@ -375,7 +373,7 @@
                                         ).then(res => {
                                             const now = new Date();
                                             const formattedDate = this.formatDate(now);
-                                            this.offerLog = this.offerLog + (this.offerLog&&"\n") + `${formattedDate}=>` + `Id:${result[0]}` + `Price:${result[1]}` + res.data
+                                            this.offerLog = this.offerLog + (this.offerLog&&"\r\n") + `${formattedDate}=> ` + `Id:${result[0]} ` + `Price:${result[1]} ` + JSON.stringify(res.data)
                                         })
                                     }
                                     this.m.delete(auctionId)
