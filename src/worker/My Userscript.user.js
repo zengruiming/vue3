@@ -276,7 +276,7 @@
                                 continue;
                             }
                             //若为整数，则直接偏移整数价格；若为小数，则偏移小数乘以最小出价金额的价格
-                            this.m.set(auctionId, parseInt(this.offset) === parseFloat(this.offset) ? min + this.offset : min + min * this.offset);
+                            this.m.set(auctionId, parseInt(this.offset) === parseFloat(this.offset) ? Math.floor(min + this.offset) : Math.floor(min + min * this.offset));
                             //抬价金额
                             let increaseOfferPrice = this.randomPrice(parseInt(this.priceIncrease.split('-')[0]), parseInt(this.priceIncrease.split('-')[1]));
                             //开始任务
