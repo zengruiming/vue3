@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         My Userscript
 // @namespace    http://tampermonkey.net/
-// @version      0.2
+// @version      0.8
 // @description  try to take over the world!
 // @author       You
 // @grant        none
@@ -23,16 +23,16 @@
     const comMain = {
         template: `
 
-          <div style="position: fixed;z-index: 999;top: 0;right: 0;">
+          <div :style="{ width: divWidth,position: 'fixed',zIndex: 999,top: 0,right: 0,height: '510px'}">
             <div style="float: right;">
-              <div @click="hide = !hide"
+              <div @click="toMini"
                    style="width: 46px;height: 46px;color: rgba(0,0,0,0.3);line-height: 46px;text-align: center;background-color: rgba(255, 255, 255, 0.8);margin-bottom: 6px;border-radius: 50%;font-size: 2vh;">
                 x
               </div>
             </div>
-            <div style="background-color: white;float: right;" v-show="hide">
+            <div style="background-color: white;float: right;width: 100%;height: 100%;" v-show="hide">
               <div
-                  style="display: flex;align-items: center;justify-content: space-around;flex-direction: column;height: 510px;">
+                  style="display: flex;align-items: center;justify-content: space-around;flex-direction: column;height: 100%;" v-show="!switchLog">
                 <div style="width: 100%;display: flex;align-items: center;justify-content: center;">
                   <span style="width: 10%;display: inline-block;font-size: .39rem;">固定出价</span>
                   <input type='number'
@@ -122,8 +122,15 @@
                     取&nbsp;&nbsp;&nbsp;&nbsp;消
                   </button>
                 </div>
-                <div v-show="message" style="color: red;text-align: center;">{{ message }}</div>
               </div>
+              <div
+                  style="display: flex;align-items: center;justify-content: space-around;flex-direction: column;height: 100%;" v-show="switchLog">
+              <textarea
+                  style="width: 100%;height: 100%;display: inline-block;line-height: .5rem;font-size: .5rem;border: none;"
+                  :placeholder="offerLog" readonly="readonly">
+                </textarea>
+              </div>
+              <div v-show="message" style="color: red;text-align: center;" @click="switchLog = !switchLog">{{ message }}</div>
             </div>
           </div>
 
@@ -139,8 +146,11 @@
                 unWord: "赠品 非卖 保护套 海蓝 霜 露 液 沫 手机壳",
                 matchWord: "",
                 message: "",
+                offerLog: "",
+                switchLog: false,
                 go: 0,
                 hide: false,
+                divWidth: 'auto',
                 checkBoxList: [
                     {
                         value: "0",
@@ -337,7 +347,7 @@
                                                     offerPrice = Math.floor(Math.random() * (currentPrice - param[0] + 1)) + param[0]
                                                 }
                                             }
-                                            if (currentPrice > param[0]) offerPrice = 0;
+                                            if (currentPrice >= param[0]) offerPrice = 0;
                                             //auctionId、offerPrice
                                             done([param[4], Math.ceil(offerPrice)]);
                                         }, offerTime)
@@ -348,6 +358,8 @@
                                         this.message = "并未出价：超过了近期最低价！";
                                     } else {
                                         let t = (new Date).getTime()
+                                        let uuid = this.getCookieUUID("__jda");
+                                        let jsToken = jdtRiskContext.deviceInfo.jsToken;
                                         axios.post(
                                             'https://api.m.jd.com/api',
                                             `body={"auctionId":"${result[0]}","price":${result[1]},"ts":${t},"entryid":"p0020003youb3","address":"19-1607-4773-62122","mpSource":1,"sourceTag":2}`,
@@ -356,12 +368,14 @@
                                                     'functionId': 'paipai.auction.offerPrice',
                                                     't': t,
                                                     'appid': 'paipai_h5',
-                                                    'x-api-eid-token': jdtRiskContext.deviceInfo.jsToken,
-                                                    'uuid': this.getCookieUUID("__jda")
+                                                    'x-api-eid-token': jsToken,
+                                                    'uuid': uuid
                                                 }
                                             }
                                         ).then(res => {
-                                            this.message = "请求结果：" + res.data.result.message
+                                            const now = new Date();
+                                            const formattedDate = this.formatDate(now);
+                                            this.offerLog = this.offerLog + (this.offerLog&&"\n") + `${formattedDate}=>` + `Id:${result[0]}` + `Price:${result[1]}` + res.data
                                         })
                                     }
                                     this.m.delete(auctionId)
@@ -689,13 +703,36 @@
             },
             getCookieUUID(val) {
                 try {
-                    var regexPattern = new RegExp(`(?:(?:^|.*;\\s*)${val}\\s*\\=\\s*([^;]*).*$)|^.*$`)
-                    var e = document.cookie.replace(regexPattern, "$1")
+                    var e = this.getCookie(val)
                         , t = e && e.split(".");
                     return Array.isArray(t) && t.length > 1 ? t[0] ? t[1] || "" : t[2] || "" : ""
                 } catch (e) {
                     return ""
                 }
+            },
+            getCookie(name) {
+                var cookies = document.cookie.split(";"); // 将cookie字符串分割成数组
+                for (var i = 0; i < cookies.length; i++) {
+                    var cookie = cookies[i].trim(); // 使用trim()方法去除前后空格
+                    if (cookie.indexOf(name + "=") === 0) {
+                        return cookie.substring(name.length + 1, cookie.length); // 获取cookie的值
+                    }
+                }
+                return ""; // 当未找到指定cookie时返回空字符串
+            },
+            formatDate(date) {
+                const day = date.getDate().toString().padStart(2, '0');
+                const month = (date.getMonth() + 1).toString().padStart(2, '0'); // 月份是从0开始的
+                const year = date.getFullYear();
+                const hours = date.getHours().toString().padStart(2, '0');
+                const minutes = date.getMinutes().toString().padStart(2, '0');
+                const seconds = date.getSeconds().toString().padStart(2, '0');
+
+                return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+            },
+            toMini() {
+                this.hide = !this.hide
+                this.divWidth = this.hide?'100%':'auto'
             },
         },
         /*        watch: {
