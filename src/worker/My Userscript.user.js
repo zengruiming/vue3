@@ -104,7 +104,7 @@
                 <div class="box"
                      style="width: 100%;height: 40px;display: flex;justify-content: space-evenly;">
                   <div v-for="(item,index) in radioList" :key="index">
-                    <input style="display: inline;" type="checkbox" name="gender" :value="item.value" :id="item.value"
+                    <input style="display: inline;height: auto;" type="checkbox" name="gender" :value="item.value" :id="item.value"
                            :checked="offerModel.includes(item.value)" @click="clickRadio(item.value)"/>
                     <label :for="item.value">
                       {{ item.label }}
@@ -128,7 +128,18 @@
               <textarea
                   style="width: 100%;height: 100%;display: inline-block;line-height: .5rem;font-size: .5rem;border: none;" readonly="readonly">{{offerLog}}</textarea>
               </div>
-              <div v-show="message" style="color: red;text-align: center;" @click="switchLog = !switchLog">{{ message }}</div>
+              <div style="color: red;text-align: center;display: flex;justify-content: space-evenly;">
+                <div>
+                  <input style="display: inline;height: auto;" type="checkbox" id = "openLog"
+                                       :checked="openLog" @click.stop="openLogFn"/>
+                  <label for="openLog">
+                    开关日志
+                  </label>
+                </div>
+                <label @click.stop="switchLogFn" >
+                  {{ message }}
+                </label>
+              </div>
             </div>
           </div>
 
@@ -143,9 +154,10 @@
                 bottomOfferPrice: 0,
                 unWord: "赠品 非卖 保护套 海蓝 霜 露 液 沫 手机壳",
                 matchWord: "",
-                message: "",
+                message: "欢迎使用",
                 offerLog: "",
                 switchLog: false,
+                openLog: false,
                 go: 0,
                 hide: false,
                 divWidth: 'auto',
@@ -371,9 +383,15 @@
                                                 }
                                             }
                                         ).then(res => {
-                                            const now = new Date();
-                                            const formattedDate = this.formatDate(now);
-                                            this.offerLog = this.offerLog + (this.offerLog&&"\r\n") + `${formattedDate}=> ` + `Id:${result[0]} ` + `Price:${result[1]} ` + JSON.stringify(res.data)
+                                            //若开启了日志功能，则显示在大面板
+                                            if (this.openLog) {
+                                                const now = new Date();
+                                                const formattedDate = this.formatDate(now);
+                                                this.offerLog = this.offerLog + (this.offerLog && "\r\n") + `${formattedDate}=> ` + `Id:${result[0]} ` + `Price:${result[1]} ` + JSON.stringify(res.data)
+                                            }else {
+                                                //默认是显示在状态栏
+                                                this.message = res.data.result.message
+                                            }
                                         })
                                     }
                                     this.m.delete(auctionId)
@@ -731,6 +749,12 @@
             toMini() {
                 this.hide = !this.hide
                 this.divWidth = this.hide?'100%':'auto'
+            },
+            switchLogFn() {
+                this.switchLog = !this.switchLog
+            },
+            openLogFn() {
+                this.openLog = !this.openLog
             },
         },
         /*        watch: {
