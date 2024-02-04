@@ -267,6 +267,7 @@
                             let auctionId = this.auctionInfos[i].auctionId || this.auctionInfos[i].id;
                             // 距离结束剩10秒才加入抢拍队列
                             let end = this.auctionInfos[i].endTime - Date.now();
+                            // 已过竞拍时间，则清除
                             if (end < 0) {
                                 this.m.delete(auctionId)
                                 this.auctionInfos.splice(i, 1)
@@ -287,8 +288,11 @@
                             } else {
                                 continue;
                             }
-                            //若为整数，则直接偏移整数价格；若为小数，则偏移小数乘以最小出价金额的价格
-                            this.m.set(auctionId, parseInt(this.offset) === parseFloat(this.offset) ? Math.floor(min + this.offset) : Math.floor(min + min * this.offset));
+                            //已加线程队列，则清除
+                            this.m.delete(auctionId)
+                            this.auctionInfos.splice(i, 1)
+                            //偏移价格(若为整数，则直接偏移整数价格；若为小数，则偏移小数乘以最小出价金额的价格)
+                            let offsetPrice = parseInt(this.offset) === parseFloat(this.offset) ? Math.floor(min + this.offset) : Math.floor(min + min * this.offset)
                             //抬价金额
                             let increaseOfferPrice = this.randomPrice(parseInt(this.priceIncrease.split('-')[0]), parseInt(this.priceIncrease.split('-')[1]));
                             //开始任务
@@ -362,7 +366,7 @@
                                             done([param[4], Math.ceil(offerPrice)]);
                                         }, offerTime)
                                     })();
-                                }, [this.m.get(auctionId), increaseOfferPrice, this.stableOfferPrice, this.bottomOfferPrice, auctionId])
+                                }, [offsetPrice, increaseOfferPrice, this.stableOfferPrice, this.bottomOfferPrice, auctionId])
                                 .done(result => {
                                     if (result[1] === 0) {
                                         this.message = "并未出价：超过了近期最低价！";
@@ -394,8 +398,6 @@
                                             }
                                         })
                                     }
-                                    this.m.delete(auctionId)
-                                    this.auctionInfos.splice(i, 1)
                                 });
                         } catch (error) {
                             continue; // 出现错误，但继续下一次循环
