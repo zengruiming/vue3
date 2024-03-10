@@ -1,10 +1,9 @@
 // ==UserScript==
 // @name         My Userscript
 // @namespace    http://tampermonkey.net/
-// @version      0.6
+// @version      0.1
 // @description  try to take over the world!
 // @author       You
-// @grant        none
 // @run-at       document-end
 // @match        https://paipai.m.jd.com/*
 // @require      https://cdn.jsdelivr.net/npm/vue@2.6.11/dist/vue.min.js
@@ -148,11 +147,11 @@
             return {
                 maxOfferPrice: 0,
                 minOfferPrice: 299,
-                priceIncrease: "1-0",
-                offset: -0.1,
+                priceIncrease: "1-10",
+                offset: -0.2,
                 stableOfferPrice: 0,
                 bottomOfferPrice: 0,
-                unWord: "赠品 非卖 保护套 海蓝 霜 露 液 沫 手机壳",
+                unWord: "赠品 非卖 保护套 手机壳 保护壳 霜 露 液 沫 颜 膜 膏 妆 肤",
                 matchWord: "",
                 message: "欢迎使用",
                 offerLog: "",
@@ -395,6 +394,9 @@
                                             }else {
                                                 //默认是显示在状态栏
                                                 this.message = res.data.result.message
+                                            }
+                                            if (res.data.result.message === '出价成功'){
+                                                this.wxPusher()
                                             }
                                         })
                                     }
@@ -758,6 +760,48 @@
             openLogFn() {
                 this.openLog = !this.openLog
             },
+            async wxPusher() {
+                const listRsp = await axios.get('https://api.m.jd.com/api', {
+                    params: {
+                        'functionId': 'dbd.record.myRecords',
+                        'body': '{"showStatus":-1,"pageSize":20,"pageNum":1,"p":2,"even":true,"mpSource":1,"sourceTag":2}',
+                        'appid': 'paipai_h5'
+                    }
+                });
+                let arr = listRsp.data.result.data.bidRecordList;
+                for (let i in arr) {
+                    if ((arr[i].status === 2 && !arr[i].orderId) || (arr[i].status === 3 && arr[i].orderId)) {
+                        //判断是否存在该值，不存在则发送通知
+                        let hasVar = await GM_getValue(arr[i].auctionId)
+                        if (!hasVar) {
+                            let res = await fetch("https://wxpusher.zjiecode.com/api/send/message", {
+                                "headers": {
+                                    "content-type": "application/json",
+                                },
+                                "body": JSON.stringify({
+                                    "appToken": "AT_gPhWPvPdl0TL3Ls1Q2DZ8tXe5vNUwf0u",
+                                    "content": arr[i].productName,
+                                    "summary": "夺宝岛",//消息摘要，显示在微信聊天页面或者模版消息卡片上，限制长度100，可以不传，不传默认截取content前面的内容。
+                                    "contentType": 1,//内容类型 1表示文字  2表示html(只发送body标签内部的数据即可，不包括body标签) 3表示markdown
+                                    "uids": [//发送目标的UID，是一个数组。注意uids和topicIds可以同时填写，也可以只填写一个。
+                                        "UID_zGDvPRKAabyj8vIVJgNaoeUMwumV"
+                                    ],
+                                    "url": "https://paipai.m.jd.com/ppdbd/pages/detail/index?id=" + arr[i].auctionId, //原文链接，可选参数
+                                    "verifyPay": false //是否验证订阅时间，true表示只推送给付费订阅用户，false表示推送的时候，不验证付费，不验证用户订阅到期时间，用户订阅过期了，也能收到。
+                                }),
+                                "method": "POST",
+                            });
+                            let jsonData = await res.json()
+                            let code = jsonData.code;
+                            if (code === 1000) {
+                                await GM_setValue(arr[i].auctionId, 1)
+                            }
+                        }
+                    } else {
+                        await GM_deleteValue(arr[i].auctionId)
+                    }
+                }
+            }
         },
         /*        watch: {
                     // 如果 `question` 发生改变，这个函数就会运行
