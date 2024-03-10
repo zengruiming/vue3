@@ -1,17 +1,15 @@
 // ==UserScript==
 // @name         My Userscript
 // @namespace    http://tampermonkey.net/
-// @version      0.1
+// @version      0.6
 // @description  try to take over the world!
 // @author       You
+// @grant        none
 // @run-at       document-end
 // @match        https://paipai.m.jd.com/*
 // @require      https://cdn.jsdelivr.net/npm/vue@2.6.11/dist/vue.min.js
 // @require      http://andywer.github.io/threadpool-js/dist/threadpool.min.js
 // @require      https://cdn.staticfile.org/axios/0.18.0/axios.min.js
-// @grant        GM_getValue
-// @grant        GM_setValue
-// @grant        GM_deleteValue
 // ==/UserScript==
 
 (function () {
@@ -201,6 +199,7 @@
                     },
                 ],
                 m: new Map(),
+                v: new Map(),
                 auctionInfos: [],
             }
         },
@@ -775,7 +774,7 @@
                 for (let i in arr) {
                     if ((arr[i].status === 2 && !arr[i].orderId) || (arr[i].status === 3 && arr[i].orderId)) {
                         //判断是否存在该值，不存在则发送通知
-                        let hasVar = await GM_getValue(arr[i].auctionId)
+                        let hasVar = this.v.has(arr[i].auctionId);
                         if (!hasVar) {
                             let res = await fetch("https://wxpusher.zjiecode.com/api/send/message", {
                                 "headers": {
@@ -797,11 +796,11 @@
                             let jsonData = await res.json()
                             let code = jsonData.code;
                             if (code === 1000) {
-                                await GM_setValue(arr[i].auctionId, 1)
+                                this.v.set(arr[i].auctionId, 0)
                             }
                         }
                     } else {
-                        await GM_deleteValue(arr[i].auctionId)
+                        this.v.delete(arr[i].auctionId)
                     }
                 }
             }
