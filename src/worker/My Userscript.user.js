@@ -9,6 +9,9 @@
 // @require      https://cdn.jsdelivr.net/npm/vue@2.6.11/dist/vue.min.js
 // @require      http://andywer.github.io/threadpool-js/dist/threadpool.min.js
 // @require      https://cdn.staticfile.org/axios/0.18.0/axios.min.js
+// @grant        GM_getValue
+// @grant        GM_setValue
+// @grant        GM_deleteValue
 // ==/UserScript==
 
 (function () {
