@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         My Userscript
 // @namespace    http://tampermonkey.net/
-// @version      0.6
+// @version      0.1
 // @description  try to take over the world!
 // @author       You
 // @grant        none
@@ -388,6 +388,7 @@
                                                 }
                                             }
                                         ).then(res => {
+                                            setTimeout(function (){this.wxPusher()},60000)
                                             //若开启了日志功能，则显示在大面板
                                             if (this.openLog) {
                                                 const now = new Date();
@@ -396,9 +397,6 @@
                                             }else {
                                                 //默认是显示在状态栏
                                                 this.message = res.data.result.message
-                                            }
-                                            if (res.data.result.message === '出价成功'){
-                                                this.wxPusher()
                                             }
                                         })
                                     }
@@ -772,7 +770,7 @@
                 });
                 let arr = listRsp.data.result.data.bidRecordList;
                 for (let i in arr) {
-                    if ((arr[i].status === 2 && !arr[i].orderId) || (arr[i].status === 3 && arr[i].orderId)) {
+                    if (arr[i].status === 2 && !arr[i].orderId) {
                         //判断是否存在该值，不存在则发送通知
                         let hasVar = this.v.has(arr[i].auctionId);
                         if (!hasVar) {
