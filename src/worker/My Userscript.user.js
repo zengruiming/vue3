@@ -385,8 +385,8 @@
                                                     'uuid': uuid
                                                 }
                                             }
-                                        ).then(res => {
-                                            setTimeout(function (){this.wxPusher()},60000)
+                                        ).then(async res => {
+                                            await this.wxPusher()
                                             //若开启了日志功能，则显示在大面板
                                             if (this.openLog) {
                                                 const now = new Date();
@@ -768,7 +768,7 @@
                 });
                 let arr = listRsp.data.result.data.bidRecordList;
                 for (let i in arr) {
-                    if (arr[i].status === 2 && !arr[i].orderId) {
+                    if (arr[i].status === 2 || arr[i].status === 3) {
                         //判断是否存在该值，不存在则发送通知
                         let hasVar = this.v.has(arr[i].auctionId);
                         if (!hasVar) {
