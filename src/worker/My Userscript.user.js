@@ -272,6 +272,7 @@
                             if (end < 0) {
                                 this.m.delete(auctionId)
                                 this.auctionInfos.splice(i, 1)
+                                i--
                                 continue
                             }
                             if (end > 38000) continue;
@@ -289,9 +290,6 @@
                             } else {
                                 continue;
                             }
-                            //已加线程队列，则清除
-                            this.m.delete(auctionId)
-                            this.auctionInfos.splice(i, 1)
                             //偏移价格(若为整数，则直接偏移整数价格；若为小数，则偏移小数乘以最小出价金额的价格)
                             let offsetPrice = parseInt(this.offset) === parseFloat(this.offset) ? Math.floor(min + this.offset) : Math.floor(min + min * this.offset)
                             //抬价金额
